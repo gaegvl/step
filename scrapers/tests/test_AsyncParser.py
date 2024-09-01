@@ -31,7 +31,7 @@ class TestAsyncParser:
     @pytest.mark.asyncio
     async def test_get_information_about_item_from_card(self):
         parser = AsyncParser(base_url='https://parsinger.ru', loop=asyncio.get_event_loop())
-        card_info: list = await parser.get_information_about_item_from_card(url='mobile/2/2_1.html')
+        card_info: dict[str, str | list] = await parser.get_information_about_item_from_card(url='mobile/2/2_1.html')
 
         assert card_info['name'] == 'teXet TM-519R черный-красный Мобильный телефон'
         assert card_info['article'] == '80397881'
