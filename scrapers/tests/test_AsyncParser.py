@@ -1,6 +1,9 @@
-import asyncio
+import json
+import os
 
+import asyncio
 import pytest
+
 from scrapers.async_parsers.async_parser import AsyncParser
 
 
@@ -29,14 +32,22 @@ class TestAsyncParser:
     async def test_get_information_about_item_from_card(self):
         parser = AsyncParser(base_url='https://parsinger.ru', loop=asyncio.get_event_loop())
         card_info: list = await parser.get_information_about_item_from_card(url='mobile/2/2_1.html')
-        description, asrticle, brand, moddel, *_, in_stock, price, old_price = card_info
-        assert description == 'teXet TM-519R черный-красный Мобильный телефон'
-        assert asrticle == 'Артикул: 80397881'
-        assert brand == 'Бренд: Texet'
-        assert moddel == 'Модель: TM-519R'
 
-        assert in_stock == 'В наличии: 31'
-        assert price == '2490 руб'
-        assert old_price == '2520 руб'
+        assert card_info['name'] == 'teXet TM-519R черный-красный Мобильный телефон'
+        assert card_info['article'] == '80397881'
+        assert card_info['description']['model'] == 'TM-519R'
 
+        assert card_info['count'] == '31'
+        assert card_info['price'] == '2490 руб'
+        assert card_info['old_price'] == '2520 руб'
 
+    @pytest.mark.asyncio
+    async def test_save_information_about_items(self):
+        parser = AsyncParser(base_url='https://parsinger.ru', loop=asyncio.get_event_loop())
+        data = [{"categories": "mobile", 'name': 'test_item', 'article': '12345'},
+                {'categories': 'mobile', 'name': 'test_item', 'article': '67890'}]
+        parser.save_information_about_items(data)
+
+        with open('data.json', 'r') as f:
+            assert json.load(f) == data
+            os.remove('data.json')
